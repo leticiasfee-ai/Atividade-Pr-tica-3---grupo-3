@@ -1,0 +1,53 @@
+# Importação das bibliotecas 
+import yfinance as yf
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
+
+# Definição do período e dos ativos
+start_date = '2010-01-01'
+end_date = '2025-09-18'
+
+empresa_ticker = 'CSNA3.SA'
+ibov_ticker = '^BVSP'
+
+# Download dos dados da empresa
+dados_empresa = yf.download(empresa_ticker, start=start_date, end=end_date, progress=False, auto_adjust=True) 
+dados_empresa = dados_empresa[['Close']]  # Manter apenas preços de fechamento ajustado
+
+# Download dos dados do Ibovespa
+dados_ibov = yf.download(ibov_ticker, start=start_date, end=end_date, progress=False, auto_adjust=True)
+dados_ibov = dados_ibov[['Close']]  # Manter apenas preços de fechamento ajustado
+
+# Dados para conferência
+# Retornos diários da empresa
+retornos_empresa_diarios = dados_empresa['Close'].pct_change().dropna()
+retornos_empresa_diarios.name = 'Retorno Diário'
+
+print("Retornos diários da empresa:")
+display(retornos_empresa_diarios.head())
+
+# Preços mensais
+precos_mensais_ibov = dados_ibov['Close'].resample('ME').last()
+
+# Retornos mensais do Ibovespa
+retornos_ibov_mensais = precos_mensais_ibov.pct_change().dropna()
+retornos_ibov_mensais.name = 'Retorno Mensal Ibov'
+
+# Exibir os primeiros retornos mensais do Ibovespa como tabela
+print("Retornos mensais do Ibovespa:")
+display(retornos_ibov_mensais.head())
+print("Dados da empresa:") 
+display(dados_empresa.head()) 
+print("\nDados do Ibovespa:") 
+display(dados_ibov.head())
+
+# auto_adjust=True → ajusta os preços automaticamente (dividendos, splits, etc.)
+# --- Estatísticas descritivas dos retornos diários da empresa ---
+print("📊 Estatísticas - Retornos diários da CSNA3:")
+display(retornos_empresa_diarios.describe())
+
+# --- Estatísticas descritivas dos retornos mensais do Ibovespa ---
+print("\n📊 Estatísticas - Retornos mensais do Ibovespa:")
+display(retornos_ibov_mensais.describe())
